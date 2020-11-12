@@ -6,7 +6,7 @@ A simple library with full support for bibtex.
 
 We support the following grammar for bibtex:
 
-![Railroad](./docs/railroad.svg)
+![Railroad](./docs/railroad.png)
 
 In summary we support:
 
