@@ -7,8 +7,17 @@ from bibtexpy.grammar import (
     field,
     string,
     entry,
+    bibtex,
 )
-from bibtexpy.models import Concat, String, Macro, Entry
+from bibtexpy.models import Concat, MacroDefinition, Macro, Entry, BibContext
+
+SAMPLE_STRINGS = [
+    ('"es"', Concat(["es"])),
+    ('es # una # "kiralina"', Concat([Macro("es"), Macro("una"), "kiralina"])),
+    ("es # una # {kiralina}", Concat([Macro("es"), Macro("una"), "kiralina"])),
+    ("1100 # una # {kiralina}", Concat(["1100", Macro("una"), "kiralina"])),
+    ('"es"', Concat(["es"])),
+]
 
 
 @pytest.mark.parametrize(
@@ -54,60 +63,36 @@ def test_quoted_parsing(value):
     assert result.asList() == [value.replace('\\"', '"')]
 
 
-@pytest.mark.parametrize(
-    "value, expected",
-    [
-        ('"es"', Concat(["es"])),
-        ('es # una # "kiralina"', Concat([Macro("es"), Macro("una"), "kiralina"])),
-        ("es # una # {kiralina}", Concat([Macro("es"), Macro("una"), "kiralina"])),
-        ("1100 # una # {kiralina}", Concat(["1100", Macro("una"), "kiralina"])),
-    ],
-)
+@pytest.mark.parametrize("value, expected", SAMPLE_STRINGS)
 def test_concat_strings(value, expected):
     (result,) = concat_string.parseString(value, parseAll=True)
     assert result == expected
 
 
-@pytest.mark.parametrize(
-    "value, expected",
-    [
-        ('"es"', Concat(["es"])),
-        ('es # una # "kiralina"', Concat([Macro("es"), Macro("una"), "kiralina"])),
-        ("es # una # {kiralina}", Concat([Macro("es"), Macro("una"), "kiralina"])),
-        ("1100 # una # {kiralina}", Concat(["1100", Macro("una"), "kiralina"])),
-        ('"es"', Concat(["es"])),
-    ],
-)
+@pytest.mark.parametrize("value, expected", SAMPLE_STRINGS)
 def test_fields(value, expected):
     (result,) = field.parseString(f"key = {value}", parseAll=True)
-    assert result == String("key", expected)
+    assert result == MacroDefinition("key", expected)
 
 
-@pytest.mark.parametrize(
-    "value, expected",
-    [
-        ('"es"', Concat(["es"])),
-        ('es # una # "kiralina"', Concat([Macro("es"), Macro("una"), "kiralina"])),
-        ("es # una # {kiralina}", Concat([Macro("es"), Macro("una"), "kiralina"])),
-        ("1100 # una # {kiralina}", Concat(["1100", Macro("una"), "kiralina"])),
-        ('"es"', Concat(["es"])),
-    ],
-)
+@pytest.mark.parametrize("value, expected", SAMPLE_STRINGS)
 def test_macro_definitions(value, expected):
     (result,) = string.parseString(f"@string {{key = {value}}}", parseAll=True)
-    assert result == String("key", expected)
+    assert result == MacroDefinition("key", expected)
+
+
+@pytest.mark.parametrize("value, expected", SAMPLE_STRINGS)
+def test_entries(value, expected):
+    (result,) = entry.parseString(f"@article {{cite, key = {value}}}", parseAll=True)
+    assert result == Entry("article", "cite", [MacroDefinition("key", expected)])
 
 
 @pytest.mark.parametrize(
     "value, expected",
-    [
-        ('"es"', Concat(["es"])),
-        ('es # una # "kiralina"', Concat([Macro("es"), Macro("una"), "kiralina"])),
-        ("es # una # {kiralina}", Concat([Macro("es"), Macro("una"), "kiralina"])),
-        ("1100 # una # {kiralina}", Concat(["1100", Macro("una"), "kiralina"])),
-        ('"es"', Concat(["es"])),
-    ],
+    SAMPLE_STRINGS,
 )
-def test_entries(value, expected):
-    (result,) = entry.parseString(f"@article {{cite, key = {value}}}", parseAll=True)
-    assert result == Entry("article", "cite", [String("key", expected)])
+def test_bibtex(value, expected):
+    (result,) = bibtex.parseString(f"@article {{cite, key = {value}}}", parseAll=True)
+    assert result == BibContext(
+        [Entry("article", "cite", [MacroDefinition("key", expected)])]
+    )

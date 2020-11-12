@@ -1,5 +1,5 @@
 import pyparsing as pp
-from bibtexpy.models import BibContext, Macro, Concat, String, Entry
+from bibtexpy.models import BibContext, Macro, Concat, MacroDefinition, Entry
 
 LCURLY, RCURLY, LPAREN, RPAREN, HASH, QUOTE, EQ, AT, COMMA = map(
     pp.Suppress, '{}()#"=@,'
@@ -56,7 +56,7 @@ field_name = pp.Word(pp.alphas, pp.alphanums + _name_symbols)
 field_value = concat_string.copy()
 field = (
     field_name.setResultsName("name") + EQ + field_value.setResultsName("value")
-).setParseAction(lambda t: String(*t.asList()))
+).setParseAction(lambda t: MacroDefinition(*t.asList()))
 
 
 # Comment
@@ -79,13 +79,13 @@ entry = (
 ).setParseAction(lambda t: Entry(*t.asList()))
 
 # Bib file
-bib = pp.ZeroOrMore(
+bibtex = pp.ZeroOrMore(
     pp.Suppress(comment) | pp.Suppress(preamble) | string | entry
-).setParseAction(BibContext)
+).setParseAction(lambda t: BibContext(t.asList()))
 
 
 if __name__ == "__main__":
     with open("./scratch/sample.bib") as bibfile:
         data = bibfile.read()
-        (result,) = bib.parseString(data, parseAll=True)
+        (result,) = bibtex.parseString(data, parseAll=True)
         print(result.__repr__())
