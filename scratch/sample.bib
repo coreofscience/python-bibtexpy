@@ -1,0 +1,35 @@
+@comment something something
+
+@string {
+    something = "something"
+}
+
+@preamble ( macro # macro # "macro" )
+
+@string (
+    else = "else" # macro
+)
+@string {
+    here = 100 # Something # else # "GO" # {GO}
+}
+
+@misc{/key,
+    author       = "John\" \{Doe",
+    title        = here,
+    howpublished = {Self published},
+    year         = 2020
+}
+@string {
+    hola = "que hace"
+}
+@misc(2key2,
+    author       = "John\" \{Doe",
+    title        = here,
+    howpublished = {Self published},
+    year         = 2020,
+    year/2         = hola
+)
+
+@string {
+    macro = "macarron"
+}

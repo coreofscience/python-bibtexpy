@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-requirements = []
+requirements = ["pyparsing>=2.4.7<3"]
 
 setup(
     author="Oscar David Arbeláez Echeverri",
@@ -30,8 +30,8 @@ setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     include_package_data=True,
-    keywords="python-sap",
-    name="python-sap",
+    keywords="bibtext, parser",
+    name="bibtexpy",
     packages=find_packages(where="src"),
     package_dir={"": "src/", "bibtexpy": "src/bibtexpy"},
     url="https://github.com/coreofscience/bibtexpy",
