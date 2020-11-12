@@ -1,5 +1,4 @@
 import pyparsing as pp
-from pyparsing.core import QuotedString
 from bibtexpy.models import BibContext, Macro, Concat, MacroDefinition, Entry
 
 LCURLY, RCURLY, LPAREN, RPAREN, HASH, QUOTE, EQ, AT, COMMA = map(
