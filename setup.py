@@ -25,6 +25,7 @@ setup(
         "Programming Language :: Python :: 3.9",
     ],
     description="Python bibtex parser and serializer.",
+    entry_points={"console_scripts": ["bibtexpy=bibtexpy.__main__:main"]},
     install_requires=requirements,
     license="MIT license",
     long_description=readme,

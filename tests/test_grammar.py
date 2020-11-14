@@ -4,12 +4,12 @@ from bibtexpy.grammar import (
     curly_string,
     quoted_string,
     concat_string,
-    field,
+    entry_field,
     string,
     entry,
     bibtex,
 )
-from bibtexpy.models import Concat, MacroDefinition, Macro, Entry, BibContext
+from bibtexpy.models import Concat, MacroDefinition, Macro, Field, Entry, BibContext
 
 SAMPLE_STRINGS = [
     ('"es"', Concat(["es"])),
@@ -71,8 +71,8 @@ def test_concat_strings(value, expected):
 
 @pytest.mark.parametrize("value, expected", SAMPLE_STRINGS)
 def test_fields(value, expected):
-    (result,) = field.parseString(f"key = {value}", parseAll=True)
-    assert result == MacroDefinition("key", expected)
+    (result,) = entry_field.parseString(f"key = {value}", parseAll=True)
+    assert result == Field("key", expected)
 
 
 @pytest.mark.parametrize("value, expected", SAMPLE_STRINGS)
@@ -84,15 +84,22 @@ def test_macro_definitions(value, expected):
 @pytest.mark.parametrize("value, expected", SAMPLE_STRINGS)
 def test_entries(value, expected):
     (result,) = entry.parseString(f"@article {{cite, key = {value}}}", parseAll=True)
-    assert result == Entry("article", "cite", [MacroDefinition("key", expected)])
+    assert result == Entry("article", "cite", [Field("key", expected)])
 
 
 @pytest.mark.parametrize(
     "value, expected",
     SAMPLE_STRINGS,
 )
-def test_bibtex(value, expected):
+def test_bibtex_entries(value, expected):
     (result,) = bibtex.parseString(f"@article {{cite, key = {value}}}", parseAll=True)
-    assert result == BibContext(
-        [Entry("article", "cite", [MacroDefinition("key", expected)])]
-    )
+    assert result == BibContext([Entry("article", "cite", [Field("key", expected)])])
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    SAMPLE_STRINGS,
+)
+def test_bibtex_macros(value, expected):
+    (result,) = bibtex.parseString(f"@string {{ key = {value}}}", parseAll=True)
+    assert result == BibContext([MacroDefinition("key", expected)])

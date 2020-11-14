@@ -17,6 +17,9 @@ class Macro:
             return False
         return self.name == o.name
 
+    def latex(self):
+        return self.name
+
 
 class Concat:
     """
@@ -33,6 +36,12 @@ class Concat:
         if not isinstance(o, self.__class__):
             return False
         return self.pieces == o.pieces
+
+    def latex(self):
+        return " # ".join(
+            item.latex() if hasattr(item, "latex") else f"{{{item}}}"
+            for item in self.pieces
+        )
 
 
 class MacroDefinition:
@@ -52,6 +61,21 @@ class MacroDefinition:
             return False
         return self.name == o.name and self.value == o.value
 
+    def latex(self):
+        return f"@STRING {{ {self.name} = {self.value.latex()} }}"
+
+
+class Field(MacroDefinition):
+    """
+    A given field of an entry.
+    """
+
+    def __repr__(self) -> str:
+        return f'Field(name="{self.name}", value={self.value})'
+
+    def latex(self):
+        return f"{self.name} = {self.value.latex()}"
+
 
 class Entry:
     def __init__(self, _type: str, key: str, fields: List[MacroDefinition]) -> None:
@@ -66,6 +90,10 @@ class Entry:
         if not isinstance(o, self.__class__):
             return False
         return self._type == o._type and self.key == o.key and self.fields == o.fields
+
+    def latex(self):
+        content = ",\n  ".join([self.key] + [field.latex() for field in self.fields])
+        return f"@{self._type} {{\n  {content}\n}}"
 
 
 class BibContext:
@@ -89,3 +117,6 @@ class BibContext:
         if not isinstance(o, self.__class__):
             return False
         return self._pieces == o._pieces
+
+    def latex(self):
+        return "\n\n".join(p.latex() for p in self._pieces)
